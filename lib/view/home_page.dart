@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:osimen_clip/util/util.dart';
-import 'package:osimen_clip/view/result_page.dart';
+import 'package:osimen_list/util/util.dart';
+import 'package:osimen_list/view/result_page.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -36,7 +36,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
-            '推しメンクリップ',
+            '推しメンリスト',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ),

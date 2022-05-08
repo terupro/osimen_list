@@ -1,6 +1,6 @@
 {
-    "name": "osimen_clip",
-    "short_name": "osimen_clip",
+    "name": "osimen_list",
+    "short_name": "osimen_list",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

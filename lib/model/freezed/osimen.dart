@@ -1,4 +1,4 @@
-import 'package:osimen_clip/model/db/db.dart';
+import 'package:osimen_list/model/db/db.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'osimen.freezed.dart';

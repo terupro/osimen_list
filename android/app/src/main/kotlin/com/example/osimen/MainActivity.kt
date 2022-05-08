@@ -1,4 +1,4 @@
-package com.example.osimen_clip
+package com.example.osimen_list
 
 import io.flutter.embedding.android.FlutterActivity
 

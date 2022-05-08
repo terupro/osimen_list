@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
-project(osimen_clip LANGUAGES CXX)
+project(osimen_list LANGUAGES CXX)
 
-set(BINARY_NAME "osimen_clip")
+set(BINARY_NAME "osimen_list")
 
 cmake_policy(SET CMP0063 NEW)
 
