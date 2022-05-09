@@ -24,8 +24,6 @@ class OsimenItem extends Table {
   TextColumn get tiktok => text().withDefault(const Constant(''))();
   // ⑦Youtube
   TextColumn get youtube => text().withDefault(const Constant(''))();
-  // ⑧Blog
-  TextColumn get blog => text().withDefault(const Constant(''))();
 }
 
 // データベースの場所を指定

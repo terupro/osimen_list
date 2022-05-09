@@ -23,6 +23,5 @@ class TempOsimenItemData with _$TempOsimenItemData {
     @Default('') String facebook,
     @Default('') String tiktok,
     @Default('') String youtube,
-    @Default('') String blog,
   }) = _TempOsimenItemData;
 }

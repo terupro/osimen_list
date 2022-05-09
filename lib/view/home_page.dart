@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:osimen_list/model/db/db.dart';
+import 'package:osimen_list/model/freezed/osimen.dart';
 import 'package:osimen_list/util/util.dart';
+import 'package:osimen_list/view/editing_page.dart';
 import 'package:osimen_list/view/result_page.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
+import 'package:osimen_list/view/setting_page.dart';
+import 'package:osimen_list/view_model/provider.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -14,20 +19,44 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   final searchController = TextEditingController();
-  List<Osimen> osimens = allOsimen;
 
   @override
   Widget build(BuildContext context) {
+    final _osimenDatabaseProvider = ref.watch(osimenDatabaseProvider);
+    final _osimenDatabaseNotifier = ref.watch(osimenDatabaseProvider.notifier);
+
+    // 入力した全ての値
+    List<OsimenItemData> osimenItems =
+        _osimenDatabaseNotifier.state.osimenItems;
+
+    // todo一覧
+    List<Widget> _allOsimenCard(
+      List<OsimenItemData> items,
+      OsimanDatabaseNotifier db,
+    ) {
+      List<Widget> list = [];
+      for (OsimenItemData item in items) {
+        Widget card = OsimenCard(osimen: item, db: db);
+        list.add(card);
+      }
+      return list;
+    }
+
+    // todoの一覧を格納するリスト
+    List<Widget> _allCard =
+        _allOsimenCard(osimenItems, _osimenDatabaseNotifier);
+
     void searchOsimen(String query) {
-      final search = allOsimen.where(
+      final search = _allOsimenCard(osimenItems, _osimenDatabaseNotifier).where(
         (osimen) {
-          final osimenTitle = osimen.title.toLowerCase();
+          // ここのosimenをクラスにしたい
+          final osimenTitle = osimen.name.toLowerCase();
           final input = query.toLowerCase();
           return osimenTitle.contains(input);
         },
       ).toList();
       setState(() {
-        osimens = search;
+        _allCard = search;
       });
     }
 
@@ -60,34 +89,8 @@ class _HomePageState extends ConsumerState<HomePage> {
               ),
             ),
             Expanded(
-              child: ListView.builder(
-                itemCount: osimens.length,
-                itemBuilder: (context, index) {
-                  final osimen = osimens[index];
-                  return Column(
-                    children: [
-                      const Divider(),
-                      ListTile(
-                        leading: Image.network(
-                          osimen.urlString,
-                          fit: BoxFit.cover,
-                          width: 50,
-                          height: 50,
-                        ),
-                        title: Text(osimen.title),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.arrow_circle_right),
-                          onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    ResultPage(osimen: osimen),
-                              )),
-                        ),
-                      ),
-                    ],
-                  );
-                },
+              child: ListView(
+                children: _allOsimenCard(osimenItems, _osimenDatabaseNotifier),
               ),
             ),
           ],
@@ -95,143 +98,11 @@ class _HomePageState extends ConsumerState<HomePage> {
         bottomNavigationBar: ConvexAppBar(
           items: const [TabItem(icon: Icons.add)],
           onTap: (_) {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (context) => Container(
-                height: MediaQuery.of(context).size.height * 0.8,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(25.0),
-                    topRight: Radius.circular(25.0),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      height: 70,
-                      child: const Center(
-                        child: Text(
-                          'プロフィール設定',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 25,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      decoration: const BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(25.0),
-                          topRight: Radius.circular(25.0),
-                        ),
-                      ),
-                    ),
-                    Column(
-                      children: [
-                        SizedBox(height: 5),
-                        const CircleAvatar(
-                          radius: 80,
-                          backgroundImage: NetworkImage(
-                              'https://sportiva.shueisha.co.jp/clm/baseball/hs_other/2021/assets_c/2021/03/6e0c670e5cae9d2943ef894afda4fc1ed9b3107b-thumb-550xauto-250190.jpg'),
-                        ),
-                        const SizedBox(height: 5),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Column(
-                            children: [
-                              settingWidget(
-                                '名前',
-                                TextField(
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: '小芝風花',
-                                  ),
-                                ),
-                              ),
-                              settingWidget(
-                                'Twitter',
-                                TextField(
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: 'https://.com',
-                                  ),
-                                ),
-                              ),
-                              settingWidget(
-                                'Facebook',
-                                TextField(
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: 'https://.com',
-                                  ),
-                                ),
-                              ),
-                              settingWidget(
-                                'Instagram',
-                                TextField(
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: 'https://.com',
-                                  ),
-                                ),
-                              ),
-                              settingWidget(
-                                'TikTok',
-                                TextField(
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: 'https://.com',
-                                  ),
-                                ),
-                              ),
-                              settingWidget(
-                                'Youtube',
-                                TextField(
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: 'https://.com',
-                                  ),
-                                ),
-                              ),
-                              settingWidget(
-                                'Blog',
-                                TextField(
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: 'https://.com',
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                width: double.infinity,
-                                height: 50,
-                                color: Colors.blue,
-                                child: ElevatedButton(
-                                  child: const Text(
-                                    '準備完了',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SettingPage(),
+                fullscreenDialog: true,
               ),
             );
           },
@@ -241,80 +112,35 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 }
 
-Widget settingWidget(String label, Widget child) {
-  return Row(
-    children: [
-      SizedBox(width: 80, child: Text(label)),
-      Expanded(child: child),
-    ],
-  );
+class OsimenCard extends StatelessWidget {
+  const OsimenCard({
+    Key? key,
+    required this.osimen,
+    required this.db,
+  }) : super(key: key);
+
+  final OsimenItemData osimen;
+  final OsimanDatabaseNotifier db;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Image.network(
+        'https://i0.wp.com/nobon.me/wp-content/uploads/2020/08/1111.jpg?fit=1242%2C1064&ssl=1',
+        fit: BoxFit.cover,
+        width: 50,
+        height: 50,
+      ),
+      title: Text(osimen.name),
+      trailing: IconButton(
+        icon: const Icon(Icons.arrow_circle_right),
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ResultPage(osimen: osimen),
+          ),
+        ),
+      ),
+    );
+  }
 }
-
-class Osimen {
-  final String title;
-  final String urlString;
-
-  const Osimen({
-    required this.title,
-    required this.urlString,
-  });
-}
-
-const allOsimen = [
-  Osimen(
-    title: '小芝風花',
-    urlString:
-        'https://sportiva.shueisha.co.jp/clm/baseball/hs_other/2021/assets_c/2021/03/6e0c670e5cae9d2943ef894afda4fc1ed9b3107b-thumb-550xauto-250190.jpg',
-  ),
-  Osimen(
-    title: '足立佳奈',
-    urlString: 'https://pbs.twimg.com/media/D5Zvb9WU8AA1WD1.jpg',
-  ),
-  Osimen(
-    title: '莉子',
-    urlString:
-        'https://i.pinimg.com/originals/6c/94/00/6c9400026e538d52c75aefc77d020ab7.jpg',
-  ),
-  Osimen(
-    title: '小芝風花',
-    urlString:
-        'https://sportiva.shueisha.co.jp/clm/baseball/hs_other/2021/assets_c/2021/03/6e0c670e5cae9d2943ef894afda4fc1ed9b3107b-thumb-550xauto-250190.jpg',
-  ),
-  Osimen(
-    title: '足立佳奈',
-    urlString: 'https://pbs.twimg.com/media/D5Zvb9WU8AA1WD1.jpg',
-  ),
-  Osimen(
-    title: '莉子',
-    urlString:
-        'https://i.pinimg.com/originals/6c/94/00/6c9400026e538d52c75aefc77d020ab7.jpg',
-  ),
-  Osimen(
-    title: '小芝風花',
-    urlString:
-        'https://sportiva.shueisha.co.jp/clm/baseball/hs_other/2021/assets_c/2021/03/6e0c670e5cae9d2943ef894afda4fc1ed9b3107b-thumb-550xauto-250190.jpg',
-  ),
-  Osimen(
-    title: '足立佳奈',
-    urlString: 'https://pbs.twimg.com/media/D5Zvb9WU8AA1WD1.jpg',
-  ),
-  Osimen(
-    title: '莉子',
-    urlString:
-        'https://i.pinimg.com/originals/6c/94/00/6c9400026e538d52c75aefc77d020ab7.jpg',
-  ),
-  Osimen(
-    title: '小芝風花',
-    urlString:
-        'https://sportiva.shueisha.co.jp/clm/baseball/hs_other/2021/assets_c/2021/03/6e0c670e5cae9d2943ef894afda4fc1ed9b3107b-thumb-550xauto-250190.jpg',
-  ),
-  Osimen(
-    title: '足立佳奈',
-    urlString: 'https://pbs.twimg.com/media/D5Zvb9WU8AA1WD1.jpg',
-  ),
-  Osimen(
-    title: '莉子',
-    urlString:
-        'https://i.pinimg.com/originals/6c/94/00/6c9400026e538d52c75aefc77d020ab7.jpg',
-  ),
-];
